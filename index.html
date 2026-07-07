@@ -3,81 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>تطبيقات 404 | البث الرياضي</title>
     <style>
-        body { 
-            background: linear-gradient(135deg, #1a1a1a, #000); 
-            color: #fff; 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh;
-        }
-        .container { 
-            width: 95%; 
-            max-width: 500px; 
-            text-align: center; 
-            padding-top: 20px; 
-        }
+        :root { --primary: #ffcc00; --bg: #0a0c10; }
+        body { background: radial-gradient(circle at top right, #1a1f2e, #0a0c10); color: #fff; font-family: 'Tajawal', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+
+        .container { width: 100%; max-width: 550px; }
         
-        /* تصميم الفيديو */
-        video { 
-            width: 100%; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            border: 1px solid #333;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .brand { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+        .status-pill { background: rgba(255, 51, 51, 0.1); border: 1px solid #ff3333; color: #ff3333; padding: 5px 15px; border-radius: 50px; font-size: 12px; font-weight: bold; animation: blink 2s infinite; }
+        
+        .hero { text-align: center; margin-bottom: 20px; }
+        .hero h1 { font-size: 28px; margin: 0; line-height: 1.2; }
+        .hero p { color: #8892b0; font-size: 14px; margin-top: 8px; }
 
-        /* تصميم الأزرار */
-        .btn { 
-            display: block; 
-            padding: 18px; 
-            margin: 20px 0; 
-            background: #e74c3c; 
-            color: #fff; 
-            text-decoration: none; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            font-size: 16px;
-            transition: transform 0.2s, background 0.3s;
-        }
-        .btn:hover { background: #c0392b; transform: scale(1.02); }
+        .video-wrapper { position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid #232936; aspect-ratio: 16/9; background: #000; }
+        video { width: 100%; height: 100%; }
+        
+        .overlay-logo { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
+        .sound-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--primary); color: #000; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-weight: 900; font-size: 16px; transition: 0.3s; }
+        
+        .features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .feat-item { background: #161b22; padding: 10px; border-radius: 12px; text-align: center; font-size: 11px; border: 1px solid #232936; }
 
-        /* شريط التليجرام */
-        .telegram-bar { 
-            background: #0088cc; 
-            padding: 15px; 
-            margin-top: 10px; 
-            display: block; 
-            color: #fff; 
-            text-decoration: none; 
-            font-weight: bold;
-            border-radius: 12px;
-            transition: opacity 0.3s;
-        }
-        .telegram-bar:hover { opacity: 0.9; }
+        .tg-link { margin-top: 25px; width: 100%; background: linear-gradient(90deg, #0088cc, #0055ff); padding: 18px; border-radius: 16px; display: flex; justify-content: center; align-items: center; text-decoration: none; color: white; font-weight: 800; font-size: 18px; transition: 0.3s; gap: 10px; }
+        
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- الفيديو -->
-        <video controls autoplay playsinline>
-            <source src="http://test-sportina.cfd:7777/max2-g/tracks-v1a1/mono.m3u8" type="application/x-mpegURL">
-        </video>
+        <header class="header">
+            <div class="brand">تطبيقات <span style="color:var(--primary)">404</span></div>
+            <div class="status-pill">● مباشر الآن</div>
+        </header>
 
-        <!-- زر التطبيقات -->
-        <a href="intent://live.http://test-sportina.cfd:7777/max2-g/tracks-v1a1/mono.m3u8" class="btn">
-            📱 تطبيقات 404
-        </a>
-        
-        <!-- رابط التليجرام -->
-        <a href="https://t.me/c1_x2" target="_blank" class="telegram-bar">
-            ✈️ اشترك في قناتنا في تليجرام
+        <div class="hero">
+            <h1>نبض الملاعب بين يديك</h1>
+            <p>شاهد أقوى المباريات العالمية بأفضل جودة تقنية</p>
+        </div>
+
+        <div class="video-wrapper">
+            <div class="sound-btn" id="soundBtn">🔊 اضغط للتشغيل</div>
+            <div class="overlay-logo">تطبيقات 404</div>
+            <video id="video" autoplay muted playsinline controls></video>
+        </div>
+
+        <div class="features">
+            <div class="feat-item">📺<br>جودة 4K</div>
+            <div class="feat-item">⚡<br>بدون تقطيع</div>
+            <div class="feat-item">🎙️<br>تعليق عربي</div>
+            <div class="feat-item">🌍<br>عالمية</div>
+        </div>
+
+        <a href="https://t.me/c1_x2" class="tg-link" target="_blank">
+            <span>انضم لمجتمعنا على تليجرام</span> ✈️
         </a>
     </div>
 
+    <script>
+        var video = document.getElementById('video');
+        var soundBtn = document.getElementById('soundBtn');
+        var videoSrc = 'https://usher.ttvnw.net/api/channel/hls/mamajjeedd99.m3u8?sig=7acbb028daaf17d55f771da1b411f2e38183cf90&token=%7B%22adblock%22%3Afalse%2C%22authorization%22%3A%7B%22forbidden%22%3Afalse%2C%22reason%22%3A%22%22%7D%2C%22blackout_enabled%22%3Afalse%2C%22channel%22%3A%22mamajjeedd99%22%2C%22channel_id%22%3A1518474435%2C%22chansub%22%3A%7B%22restricted_bitrates%22%3A%5B%5D%2C%22view_until%22%3A1924905600%7D%2C%22ci_gb%22%3Afalse%2C%22geoblock_reason%22%3A%22%22%2C%22device_id%22%3A%22d7c1c94887a2e8d6a4b77e7e9a1980d3%22%2C%22expires%22%3A1783440714%2C%22extended_history_allowed%22%3Afalse%2C%22game%22%3A%22%22%2C%22hide_ads%22%3Afalse%2C%22https_required%22%3Atrue%2C%22mature%22%3Afalse%2C%22notification_id%22%3Anull%2C%22partner%22%3Afalse%2C%22platform%22%3A%22web%22%2C%22player_type%22%3A%22site%22%2C%22private%22%3A%7B%22allowed_to_view%22%3Atrue%7D%2C%22privileged%22%3Afalse%2C%22role%22%3A%22%22%2C%22server_ads%22%3Atrue%2C%22show_ads%22%3Atrue%2C%22subscriber%22%3Afalse%2C%22turbo%22%3Afalse%2C%22user_id%22%3Anull%2C%22user_ip%22%3A%22159.198.41.140%22%2C%22version%22%3A3%2C%22maximum_resolution%22%3A%22FULL_HD%22%2C%22maximum_video_bitrate_kbps%22%3A12500%2C%22maximum_resolution_reasons%22%3A%7B%22QUAD_HD%22%3A%5B%22AUTHZ_NOT_LOGGED_IN%22%5D%2C%22ULTRA_HD%22%3A%5B%22AUTHZ_NOT_LOGGED_IN%22%5D%7D%2C%22maximum_video_bitrate_kbps_reasons%22%3A%5B%22AUTHZ_DISALLOWED_BITRATE%22%5D%7D&allow_source=true';
+        
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+        }
+
+        soundBtn.addEventListener('click', function() {
+            video.muted = false;
+            soundBtn.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
-
