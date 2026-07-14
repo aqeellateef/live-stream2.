@@ -3,61 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Player</title>
+    <title>مشغل الفيديو</title>
     <style>
-        body { 
-            background: linear-gradient(135deg, #1a1a1a, #000); 
-            color: #fff; 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh;
-        }
-        .container { 
-            width: 95%; 
-            max-width: 500px; 
-            text-align: center; 
-            padding-top: 20px; 
-        }
-        
-        /* تصميم الفيديو */
-        video { 
-            width: 100%; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            border: 1px solid #333;
-            margin-bottom: 20px;
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
         }
 
-        /* شريط التليجرام */
-        .telegram-bar { 
-            background: #0088cc; 
-            padding: 15px; 
-            display: block; 
-            color: #fff; 
-            text-decoration: none; 
-            font-weight: bold;
-            border-radius: 12px;
-            transition: transform 0.2s, background 0.3s;
+        .video-container {
+            width: 100%;
+            max-width: 800px;
         }
-        .telegram-bar:hover { 
-            background: #0077b5; 
-            transform: scale(1.02);
+
+        iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+        }
+
+        .telegram-bar {
+            width: 100%;
+            max-width: 800px;
+            background-color: #0088cc;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .telegram-bar:hover {
+            background-color: #006699;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <video controls autoplay playsinline>
-            <source src="https://euc13.playlist.ttvnw.net/v1/playlist/Cv4G3LyYJwzMaErlbOi4UYbE3KgmvKg_4SSDEaxvA92vXXfxNuT69MgkAs6lDfh7sAHp-H-mBh-XpUmVBHh1AVX8ac2pnOnK2dQz2YGvXIEnxMMImx8xnHV-bGK65prAkoYlUpaQKRd6UO80pdCfcB830h2UtyXDw-YTl_EUb-m0z3hmyjk0Oy9UzGyQCxcHshjjK3XrN5Dcuv9NOotUWoganVS7h_1sVbjpg31Lx0L_W792sEUr-JT5GZ6WyyGN9k7fxTLztkoh108okz7mOXyeneQucnmAph8jX4PEKH3txdRY-SqZdqHuM6c6L4rsbVJ50jI7DdVMx156wFZUeDYUFcX6lY3o9OKfJ6J3mQRZ_a0E3iDkOtCyQ3ggOzTy8g2rHEcG2GrKrBqmN2gntpfeOHDcYJBoJ6D2Nb2pox8w_PiWPFJ8nXzrhn1nm-7AmetKIPkCwJjsYJU9BgBhx5eApuL6lJXtyjmcqaORdCKfgEUT4JC3NT0n3vWxgRu83iz-4Tcaoggi1ueFHMCNzNnEZ3ho7q3Vw0eyrUzra--KaUn16gm5NwTCHUHOdK-L4OqWHTt4j0jlChrNpZgBlmALRWBXxf7I81YeqXozuYx9snZJLPf64LKKpGCMkYZudAAXT55WwDsJJ-yrgd1TAAzjLdEbTo_5CFb2Z4mMXLpydSor66isvFmOhfSmQBTUZ47buWQeIpxQ4_DQbw67h78UtZ4J_4r9jErel9x4Bn5FKVIq70Wc_3l805YZsHjzCjexii8zCGNnJ5rFqZk4n8_BeGz7v6g-sbDXKEV9FjL4vi8CPIK9d57rZBpIl8NINfV_yzCwveU8wqmLBowJQBNdflst5MZjxFG_ODfpO5UAeAgPY85weHZJCSNMDZt9iOO_iYug1lj8KJrzeTN3n-o5JpGA3MyWlvo3m-cYiHWpUEI2tW9Qcu6VDgd1wqJRNvmoICN86alO22vvVa1wXwoVyhvEAi23-eDY5H6ZzA5Nj-2Lv2TNKNXLZibIjFIardcCZFmrK_nwc3Cwyu2cOSPXluS6RNXsospv3dd2VMwSCTCNG4v6FysCTf_I_k7MwxXOnZQhdPAc5aSOByc-Xb1ICAU8IdTazvjKaPfRW7xxMm_DMmpCCiW3C9Qlhl1-GzR1W5kqY_54i9UcI1ig9kYqCzGTQJbvZ0fabtCClrX5GgwcwTiN1wSulDxSixsgASoJZXUtd2VzdC0yMMkP.m3u8" type="application/x-mpegURL">
-        </video>
+    <div class="video-container">
+        <iframe src="https://25.yallashoot11.fun/albaplayer/live1/?serv=1" allowfullscreen></iframe>
         
-        <a href="https://t.me/c1_x2" target="_blank" class="telegram-bar">
-            ✈️ اشترك في قناتنا في تليجرام
+        <a href="https://t.me/c1_x2" class="telegram-bar" target="_blank">
+            اشترك في قناتنا على تليجرام ليصلك كل جديد
         </a>
     </div>
+
 
 </body>
 </html>
