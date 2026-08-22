@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Live Sports Tv</title> 
+<title>Live Sports TV - Smart Edition</title> 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,463 +13,351 @@
 
 <style>
 :root {
-  --yacine-dark: #121620;
-  --yacine-card: #1b2131;
-  --yacine-orange: #ff6b00;
-  --yacine-red: #e50914;
-  --yacine-border: rgba(255, 255, 255, 0.07);
+  --tv-bg: #090b10;
+  --tv-surface: #141a29;
+  --tv-surface-hover: #1f283d;
+  --tv-accent: #ff6b00;
+  --tv-accent-glow: rgba(255, 107, 0, 0.4);
+  --tv-border: rgba(255, 255, 255, 0.08);
+  --tv-text: #f8fafc;
+  --tv-text-muted: #94a3b8;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
-body {
+/* فرض العرض الأفقي الإجباري */
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--tv-bg);
+  color: var(--tv-text);
   font-family: 'Cairo', sans-serif;
-  background-color: var(--yacine-dark);
-  color: #fff;
-  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+@media screen and (orientation: portrait) {
+  body {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    overflow: hidden;
+  }
+}
+
+.tv-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+.player-section {
+  background: #000;
   display: flex;
   flex-direction: column;
+  position: relative;
+  border-left: 2px solid var(--tv-border);
 }
 
-/* حاوية مشغل الفيديو في الأعلى */
 .player-wrapper {
   width: 100%;
+  flex: 1;
   background: #000;
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  aspect-ratio: 16 / 9;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#native-video {
+#native-video, .stream-iframe {
   width: 100%;
   height: 100%;
   object-fit: contain;
   background: #000;
-}
-
-.stream-iframe {
-  width: 100%;
-  height: 100%;
   border: none;
 }
 
-/* شريط الأقسام بتصميم أنيق وعصري */
-.categories-bar {
-  background: linear-gradient(180deg, #181d2b 0%, #131722 100%);
-  padding: 14px 16px;
+.current-info-bar {
+  background: linear-gradient(180deg, rgba(20,26,41,0.8) 0%, rgba(10,13,20,0.95) 100%);
+  padding: 16px 24px;
   display: flex;
   align-items: center;
-  overflow-x: auto;
-  gap: 12px;
-  border-bottom: 1px solid var(--yacine-border);
-  box-shadow: inset 0 -4px 10px rgba(0, 0, 0, 0.2);
-  scrollbar-width: none;
+  justify-content: space-between;
+  border-top: 1px solid var(--tv-border);
 }
 
-.categories-bar::-webkit-scrollbar {
+.current-channel-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-badge {
+  background: #e50914;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  background: var(--tv-surface);
+  padding: 20px;
+  overflow: hidden;
+}
+
+.tv-categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.tv-categories::-webkit-scrollbar {
   display: none;
 }
 
-.category-pill {
+.tv-cat-btn {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  padding: 8px 18px;
-  border-radius: 30px;
-  cursor: pointer;
+  border: 2px solid var(--tv-border);
+  color: var(--tv-text-muted);
+  padding: 10px 20px;
+  border-radius: 12px;
   font-family: 'Cairo', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.category-pill svg {
-  width: 16px;
-  height: 16px;
+.tv-cat-btn svg {
+  width: 18px;
+  height: 18px;
   fill: currentColor;
-  transition: fill 0.3s;
 }
 
-.category-pill:hover {
-  background: rgba(255, 107, 0, 0.1);
-  color: #fff;
-  border-color: rgba(255, 107, 0, 0.3);
-  transform: translateY(-1px);
-}
-
-.category-pill.active {
+.tv-cat-btn:focus, .tv-cat-btn.active {
   background: linear-gradient(135deg, #ff6b00 0%, #ff8833 100%);
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4);
-  transform: translateY(-2px);
+  color: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 15px var(--tv-accent-glow);
+  transform: scale(1.03);
+  outline: none;
 }
 
-/* محتوى القنوات */
-.content-body {
-  padding: 16px;
-  flex: 1;
-}
-
-.section-header-row {
+/* شريط الجودات الثابت أسفل الأقسام */
+.tv-qualities-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.section-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #f8fafc;
-  display: flex;
-  align-items: center;
   gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 5px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tv-border);
+  flex-shrink: 0;
 }
 
-.section-title::before {
-  content: '';
-  width: 4px;
-  height: 16px;
-  background: var(--yacine-orange);
-  border-radius: 4px;
-}
-
-/* شارات الجودات */
-.qualities-badges {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.qualities-badges.hidden {
+.tv-qualities-bar.hidden {
   display: none !important;
 }
 
-.quality-badge {
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 4px 10px;
+.tv-quality-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--tv-border);
+  color: var(--tv-text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 16px;
   border-radius: 8px;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: rgba(148, 163, 184, 0.08);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-}
-
-.quality-badge:hover {
-  background: rgba(148, 163, 184, 0.15);
-  color: #fff;
-  border-color: rgba(148, 163, 184, 0.3);
-}
-
-.quality-badge.active {
-  background: var(--yacine-orange);
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
-  transform: translateY(-1px);
-}
-
-.channels-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.channel-item {
-  background-color: var(--yacine-card);
-  border: 1px solid var(--yacine-border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.channel-item:hover, .channel-item.active-channel {
-  border-color: var(--yacine-orange);
-  background: #20273a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.channel-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.live-dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--yacine-red);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--yacine-red);
-  animation: flash 1.5s infinite;
-}
-
-@keyframes flash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.channel-name {
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.watch-btn {
-  background: rgba(255, 107, 0, 0.12);
-  color: var(--yacine-orange);
-  border: none;
-  font-family: 'Cairo', sans-serif;
-  font-size: 0.78rem;
-  padding: 7px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.channel-item.active-channel .watch-btn {
-  background: var(--yacine-orange);
-  color: white;
-  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
-}
-
-.status-message {
-  text-align: center;
-  padding: 30px;
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
-.mini-spinner {
-  width: 22px;
-  height: 22px;
-  border: 2px solid rgba(255,255,255,0.1);
-  border-top-color: var(--yacine-orange);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 10px auto;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* نافذة تيليغرام المنبثقة */
-.tg-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.tg-modal-overlay.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-.tg-modal-card {
-  background: #181c29;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  width: 100%;
-  max-width: 380px;
-  border-radius: 20px;
-  padding: 28px 20px;
-  text-align: center;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
-}
-
-.tg-modal-overlay.show .tg-modal-card {
-  transform: scale(1);
-}
-
-.tg-icon-wrapper {
-  width: 65px;
-  height: 65px;
-  margin: 0 auto 16px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tg-icon-wrapper svg {
-  width: 55px;
-  height: 55px;
-  fill: #229ED9;
-  filter: drop-shadow(0 0 10px rgba(34, 158, 217, 0.4));
-}
-
-.tg-modal-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #229ED9;
-  margin-bottom: 10px;
-}
-
-.tg-modal-desc {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-.tg-checkbox-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 22px;
-  cursor: pointer;
-  font-size: 0.82rem;
-  color: #cbd5e1;
-}
-
-.tg-checkbox-container input {
-  accent-color: #229ED9;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.tg-btn-join {
-  display: block;
-  width: 100%;
-  background: #229ED9;
-  color: #fff;
-  text-decoration: none;
-  font-family: 'Cairo', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  margin-bottom: 10px;
-  box-shadow: 0 4px 15px rgba(34, 158, 217, 0.3);
-  transition: background 0.2s;
-}
-
-.tg-btn-join:hover {
-  background: #1b85b8;
-}
-
-.tg-btn-later {
-  display: block;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-family: 'Cairo', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 10px;
-  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.tg-btn-later:hover {
-  background: rgba(255, 255, 255, 0.1);
+.tv-quality-btn.active, .tv-quality-btn:focus {
+  background: var(--tv-accent);
   color: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 12px var(--tv-accent-glow);
+  outline: none;
+}
+
+.tv-channels-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tv-accent) transparent;
+}
+
+.tv-channel-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--tv-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tv-channel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tv-channel-dot {
+  width: 10px;
+  height: 10px;
+  background: #e50914;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #e50914;
+}
+
+.tv-channel-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.tv-channel-action {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--tv-text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.tv-channel-card:focus, .tv-channel-card.active-channel {
+  background: var(--tv-surface-hover);
+  border-color: var(--tv-accent);
+  box-shadow: 0 0 20px var(--tv-accent-glow);
+  transform: scale(1.02);
+  outline: none;
+}
+
+.tv-channel-card:focus .tv-channel-action,
+.tv-channel-card.active-channel .tv-channel-action {
+  background: var(--tv-accent);
+  color: #fff;
+}
+
+.tv-status {
+  text-align: center;
+  padding: 40px;
+  color: var(--tv-text-muted);
+  font-size: 0.95rem;
+}
+
+.tv-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: var(--tv-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
 </head> 
 
 <body oncontextmenu="return false;"> 
 
-<!-- نافذة تيليغرام المنبثقة -->
-<div class="tg-modal-overlay" id="tgModal">
-  <div class="tg-modal-card">
-    <div class="tg-icon-wrapper">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.38-.51 1.08-.78 4.22-1.84 7.03-3.04 8.43-3.61 4.01-1.67 4.84-1.96 5.38-1.97.12 0 .39.03.56.17.15.12.19.28.21.4-.01.06.01.24-.02.38z"/>
-      </svg>
+<div class="tv-layout">
+  <!-- قسم مشغل الفيديو (اليمين) -->
+  <div class="player-section">
+    <div class="player-wrapper" id="playerWrapper">
+      <iframe id="streamFrame" class="stream-iframe" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
     </div>
-    <div class="tg-modal-title">انضم إلى مجتمعنا</div>
-    <div class="tg-modal-desc">ابق على اطلاع بآخر التحديثات والقنوات الجديدة والميزات الحصرية. انضم إلى قناتنا على تيليغرام للحصول على الأخبار الفورية والدعم المستمر!</div>
     
-    <label class="tg-checkbox-container">
-      <input type="checkbox" id="dontShowAgain">
-      <span>لا تظهر مرة أخرى</span>
-    </label>
-
-    <a href="https://t.me/c1_x2" target="_blank" class="tg-btn-join" id="joinTgBtn">انضم إلى تيليغرام</a>
-    <button class="tg-btn-later" id="closeTgModal">ربما لاحقاً</button>
-  </div>
-</div>
-
-<!-- حاوية مشغل الفيديو في الأعلى -->
-<div class="player-wrapper" id="playerWrapper">
-  <iframe id="streamFrame" class="stream-iframe" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
-</div>
-
-<!-- شريط الأقسام الأفقي -->
-<div class="categories-bar" id="categoriesBar">
-  <button class="category-pill active">جاري التحميل...</button>
-</div>
-
-<!-- قائمة القنوات في الأسفل -->
-<div class="content-body">
-  <div class="section-header-row">
-    <div class="section-title" id="sectionTitle">Bein Sports</div>
-    <div class="qualities-badges" id="qualitiesContainer">
-      <span class="quality-badge" id="badgeSD" onclick="switchToQualityCategory('360', 'SD')">SD</span>
-      <span class="quality-badge" id="badgeHD" onclick="switchToQualityCategory('720', 'HD')">HD</span>
-      <span class="quality-badge active" id="badgeFHD" onclick="switchToQualityCategory('1080', 'FHD')">FHD</span>
+    <div class="current-info-bar">
+      <div class="current-channel-title">
+        <span class="live-badge">مباشر</span>
+        <span id="activeChannelName">اختر قناة</span>
+      </div>
     </div>
   </div>
-  <div class="channels-grid" id="channelsList">
-    <div class="status-message">
-      <div class="mini-spinner"></div>
-      جاري تحميل الأقسام والقنوات...
+
+  <!-- قسم الأقسام والقنوات (اليسار) -->
+  <div class="sidebar-section">
+    <!-- شريط الأقسام -->
+    <div class="tv-categories" id="categoriesBar">
+      <button class="tv-cat-btn active">جاري التحميل...</button>
+    </div>
+
+    <!-- أزرار تغيير الجودة الثابتة تحت قسم Bein Sports -->
+    <div class="tv-qualities-bar" id="qualitiesBar">
+      <button class="tv-quality-btn" id="badgeSD" tabindex="0" onclick="switchToQualityCategory('360', 'SD')">SD</button>
+      <button class="tv-quality-btn" id="badgeHD" tabindex="0" onclick="switchToQualityCategory('720', 'HD')">HD</button>
+      <button class="tv-quality-btn active" id="badgeFHD" tabindex="0" onclick="switchToQualityCategory('1080', 'FHD')">FHD</button>
+    </div>
+
+    <!-- قائمة القنوات -->
+    <div class="tv-channels-container" id="channelsList">
+      <div class="tv-status">
+        <div class="tv-spinner"></div>
+        جاري تحميل البيانات...
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 const backendEndpoint = "https://yacine-proxy.hsinnzaer5.workers.dev";
-
 let currentHls = null;
 let allCategories = [];
 
-// تم تشفير الروابط حصرياً بنظام Base64 لمنع سرقتها أو استخراجها من الكود المصدري
+const fallbackChannels = {
+  "bein_fhd": [
+    { id: "b1", name: "beIN Sports 1 FHD", url: "https://redperch.space/dramacardinal.php?id=alwan1" },
+    { id: "b2", name: "beIN Sports 2 FHD", url: "https://redperch.space/dramacardinal.php?id=alwan2" },
+    { id: "b3", name: "beIN Sports 3 FHD", url: "https://redperch.space/dramacardinal.php?id=alwan3" },
+  ]
+};
+
 const encodedAlwanChannels = [
   { name: "Alwan Sport 1", code: "aHR0cHM6Ly9yZWRwZXJjaC5zcGFjZS9kcmFtYWNhcmRpbmFsLnBocD9pZD1hbHdhbjE=" },
   { name: "Alwan Sport 2", code: "aHR0cHM6Ly9yZWRwZXJjaC5zcGFjZS9kcmFtYWNhcmRpbmFsLnBocD9pZD1hbHdhbjI=" },
@@ -481,26 +369,6 @@ const encodedAlwanChannels = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-  const isHidden = localStorage.getItem("hide_telegram_dialog");
-  if (!isHidden) {
-    setTimeout(() => {
-      document.getElementById("tgModal").classList.add("show");
-    }, 500);
-  }
-
-  const closeModal = () => {
-    const dontShow = document.getElementById("dontShowAgain").checked;
-    if (dontShow) {
-      localStorage.setItem("hide_telegram_dialog", "true");
-    }
-    document.getElementById("tgModal").classList.remove("show");
-  };
-
-  document.getElementById("closeTgModal").onclick = closeModal;
-  document.getElementById("joinTgBtn").onclick = () => {
-    closeModal();
-  };
-
   initApp();
 });
 
@@ -513,6 +381,7 @@ async function fetchFromBackend(path) {
 async function initApp() {
   const categoriesBar = document.getElementById("categoriesBar");
   const channelsList = document.getElementById("channelsList");
+  const tvIconSvg = `<svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>`;
 
   try {
     const res = await fetchFromBackend("/api/categories");
@@ -533,55 +402,113 @@ async function initApp() {
     }
 
     categoriesBar.innerHTML = "";
-    const tvIconSvg = `<svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>`;
 
-    if (defaultCat) {
+    if (defaultCat || allCategories.length > 0) {
       const beinBtn = document.createElement("button");
-      beinBtn.className = "category-pill active";
+      beinBtn.className = "tv-cat-btn active";
+      beinBtn.setAttribute("tabindex", "0");
       beinBtn.innerHTML = `${tvIconSvg} <span>Bein Sports</span>`;
-
       beinBtn.onclick = () => {
-        document.querySelectorAll(".category-pill").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tv-cat-btn").forEach(b => b.classList.remove("active"));
         beinBtn.classList.add("active");
+        document.getElementById("qualitiesBar").classList.remove("hidden");
         switchToQualityCategory('1080', 'FHD');
       };
       categoriesBar.appendChild(beinBtn);
     }
 
     const alwanPill = document.createElement("button");
-    alwanPill.className = "category-pill";
+    alwanPill.className = "tv-cat-btn";
+    alwanPill.setAttribute("tabindex", "0");
     alwanPill.innerHTML = `${tvIconSvg} <span>Alwan Sport</span>`;
     alwanPill.onclick = () => {
-      document.querySelectorAll(".category-pill").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tv-cat-btn").forEach(b => b.classList.remove("active"));
       alwanPill.classList.add("active");
+      document.getElementById("qualitiesBar").classList.add("hidden");
       renderAlwanSportChannels();
     };
     categoriesBar.appendChild(alwanPill);
 
     if (defaultCat) {
       loadChannelsForCategory(defaultCat.id, "Bein Sports", true);
+    } else {
+      renderFallbackChannels();
     }
 
   } catch (err) {
-    categoriesBar.innerHTML = `<span style="font-size:0.75rem; color:#e50914;">خطأ في التحميل</span>`;
-    channelsList.innerHTML = `<div class="status-message">⚠️ تعذر الاتصال بالخادم</div>`;
+    categoriesBar.innerHTML = "";
+    
+    const beinBtn = document.createElement("button");
+    beinBtn.className = "tv-cat-btn active";
+    beinBtn.setAttribute("tabindex", "0");
+    beinBtn.innerHTML = `${tvIconSvg} <span>Bein Sports</span>`;
+    beinBtn.onclick = () => {
+      document.querySelectorAll(".tv-cat-btn").forEach(b => b.classList.remove("active"));
+      beinBtn.classList.add("active");
+      document.getElementById("qualitiesBar").classList.remove("hidden");
+      renderFallbackChannels();
+    };
+    categoriesBar.appendChild(beinBtn);
+
+    const alwanPill = document.createElement("button");
+    alwanPill.className = "tv-cat-btn";
+    alwanPill.setAttribute("tabindex", "0");
+    alwanPill.innerHTML = `${tvIconSvg} <span>Alwan Sport</span>`;
+    alwanPill.onclick = () => {
+      document.querySelectorAll(".tv-cat-btn").forEach(b => b.classList.remove("active"));
+      alwanPill.classList.add("active");
+      document.getElementById("qualitiesBar").classList.add("hidden");
+      renderAlwanSportChannels();
+    };
+    categoriesBar.appendChild(alwanPill);
+
+    renderFallbackChannels();
   }
 }
 
-function switchToQualityCategory(qualityQuery, badgeType) {
-  document.getElementById("qualitiesContainer").classList.remove("hidden");
+function renderFallbackChannels() {
+  const channelsList = document.getElementById("channelsList");
+  document.getElementById("activeChannelName").textContent = fallbackChannels.bein_fhd[0].name;
+  channelsList.innerHTML = "";
 
+  stopCurrentStream();
+  const playerWrapper = document.getElementById("playerWrapper");
+  playerWrapper.innerHTML = `<video id="native-video" controls autoplay playsinline webkit-playsinline></video>`;
+  playStream(fallbackChannels.bein_fhd[0].url);
+
+  fallbackChannels.bein_fhd.forEach((channel, index) => {
+    const item = document.createElement("div");
+    item.className = "tv-channel-card";
+    item.setAttribute("tabindex", "0");
+    if (index === 0) item.classList.add("active-channel");
+
+    item.innerHTML = `
+      <div class="tv-channel-info">
+        <span class="tv-channel-dot"></span>
+        <span class="tv-channel-name">${channel.name}</span>
+      </div>
+      <span class="tv-channel-action">تشغيل</span>
+    `;
+
+    item.onclick = () => {
+      document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
+      item.classList.add("active-channel");
+      document.getElementById("activeChannelName").textContent = channel.name;
+      playStream(channel.url);
+    };
+
+    channelsList.appendChild(item);
+  });
+}
+
+function switchToQualityCategory(qualityQuery, badgeType) {
   document.getElementById("badgeSD").classList.remove("active");
   document.getElementById("badgeHD").classList.remove("active");
   document.getElementById("badgeFHD").classList.remove("active");
 
-  if (badgeType === 'SD') {
-    document.getElementById("badgeSD").classList.add("active");
-  } else if (badgeType === 'HD') {
-    document.getElementById("badgeHD").classList.add("active");
-  } else if (badgeType === 'FHD') {
-    document.getElementById("badgeFHD").classList.add("active");
-  }
+  if (badgeType === 'SD') document.getElementById("badgeSD").classList.add("active");
+  else if (badgeType === 'HD') document.getElementById("badgeHD").classList.add("active");
+  else if (badgeType === 'FHD') document.getElementById("badgeFHD").classList.add("active");
 
   const targetCat = allCategories.find(cat => {
     const name = (cat.name || cat.title || "").toLowerCase();
@@ -591,48 +518,41 @@ function switchToQualityCategory(qualityQuery, badgeType) {
   if (targetCat) {
     loadChannelsForCategory(targetCat.id, "Bein Sports", true);
   } else {
-    document.getElementById("channelsList").innerHTML = `<div class="status-message">عذراً، قسم Bein ${qualityQuery} غير متوفر حالياً.</div>`;
+    renderFallbackChannels();
   }
 }
 
-// دالة فك التشفير وعرض قنوات ألوان فورياً
 function renderAlwanSportChannels() {
-  document.getElementById("qualitiesContainer").classList.add("hidden");
-
   stopCurrentStream();
+
   const playerWrapper = document.getElementById("playerWrapper");
-  
-  // فك تشفير رابط القناة الأولى للتشغيل التلقائي
   const firstDecodedUrl = atob(encodedAlwanChannels[0].code);
   playerWrapper.innerHTML = `<iframe id="streamFrame" class="stream-iframe" src="${firstDecodedUrl}" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
 
-  const channelsList = document.getElementById("channelsList");
-  const sectionTitle = document.getElementById("sectionTitle");
+  document.getElementById("activeChannelName").textContent = encodedAlwanChannels[0].name;
 
-  sectionTitle.textContent = "Alwan Sport";
+  const channelsList = document.getElementById("channelsList");
   channelsList.innerHTML = "";
 
   encodedAlwanChannels.forEach((channel, index) => {
     const item = document.createElement("div");
-    item.className = "channel-item";
-    if (index === 0) {
-      item.classList.add("active-channel");
-    }
+    item.className = "tv-channel-card";
+    item.setAttribute("tabindex", "0");
+    if (index === 0) item.classList.add("active-channel");
 
     item.innerHTML = `
-      <div class="channel-info">
-        <span class="live-dot"></span>
-        <span class="channel-name">${channel.name}</span>
+      <div class="tv-channel-info">
+        <span class="tv-channel-dot"></span>
+        <span class="tv-channel-name">${channel.name}</span>
       </div>
-      <button class="watch-btn">تشغيل</button>
+      <span class="tv-channel-action">تشغيل</span>
     `;
 
     item.onclick = () => {
-      document.querySelectorAll(".channel-item").forEach(i => i.classList.remove("active-channel"));
+      document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
       item.classList.add("active-channel");
-      // فك التشفير وقت النقر حصرياً
-      const decodedUrl = atob(channel.code);
-      document.getElementById('streamFrame').src = decodedUrl;
+      document.getElementById("activeChannelName").textContent = channel.name;
+      document.getElementById('streamFrame').src = atob(channel.code);
     };
 
     channelsList.appendChild(item);
@@ -645,12 +565,9 @@ async function loadChannelsForCategory(catId, catName, autoPlayFirst = false) {
   playerWrapper.innerHTML = `<video id="native-video" controls autoplay playsinline webkit-playsinline></video>`;
 
   const channelsList = document.getElementById("channelsList");
-  const sectionTitle = document.getElementById("sectionTitle");
-
-  sectionTitle.textContent = catName;
   channelsList.innerHTML = `
-    <div class="status-message">
-      <div class="mini-spinner"></div>
+    <div class="tv-status">
+      <div class="tv-spinner"></div>
       جاري تحميل قنوات ${catName}...
     </div>
   `;
@@ -675,36 +592,35 @@ async function loadChannelsForCategory(catId, catName, autoPlayFirst = false) {
       } catch (e) {}
     }
 
-    channelsList.innerHTML = "";
-
     if (channels.length === 0) {
-      channelsList.innerHTML = `<div class="status-message">لا توجد قنوات متاحة في هذا القسم.</div>`;
+      renderFallbackChannels();
       return;
     }
 
-    channels = channels.slice(0, 10);
+    channelsList.innerHTML = "";
+    channels = channels.slice(0, 12);
 
     channels.forEach((channel, index) => {
       const chName = channel.name || channel.title || `قناة ${index + 1}`;
       const chId = channel.id;
 
       const item = document.createElement("div");
-      item.className = "channel-item";
-      if (autoPlayFirst && index === 0) {
-        item.classList.add("active-channel");
-      }
+      item.className = "tv-channel-card";
+      item.setAttribute("tabindex", "0");
+      if (autoPlayFirst && index === 0) item.classList.add("active-channel");
 
       item.innerHTML = `
-        <div class="channel-info">
-          <span class="live-dot"></span>
-          <span class="channel-name">${chName}</span>
+        <div class="tv-channel-info">
+          <span class="tv-channel-dot"></span>
+          <span class="tv-channel-name">${chName}</span>
         </div>
-        <button class="watch-btn">تشغيل</button>
+        <span class="tv-channel-action">تشغيل</span>
       `;
 
       item.onclick = async () => {
-        document.querySelectorAll(".channel-item").forEach(i => i.classList.remove("active-channel"));
+        document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
         item.classList.add("active-channel");
+        document.getElementById("activeChannelName").textContent = chName;
         await playChannelStream(chId, channel);
       };
 
@@ -712,11 +628,12 @@ async function loadChannelsForCategory(catId, catName, autoPlayFirst = false) {
     });
 
     if (autoPlayFirst && channels.length > 0) {
+      document.getElementById("activeChannelName").textContent = channels[0].name || channels[0].title;
       await playChannelStream(channels[0].id, channels[0]);
     }
 
   } catch (err) {
-    channelsList.innerHTML = `<div class="status-message">⚠️ فشل تحميل القنوات</div>`;
+    renderFallbackChannels();
   }
 }
 
@@ -735,9 +652,7 @@ async function playChannelStream(channelId, channelObj) {
       streamUrl = channelObj.url || channelObj.stream_url;
     }
 
-    if (streamUrl) {
-      playStream(streamUrl);
-    }
+    if (streamUrl) playStream(streamUrl);
   } catch (e) {
     if (channelObj && (channelObj.url || channelObj.stream_url)) {
       playStream(channelObj.url || channelObj.stream_url);
@@ -762,7 +677,6 @@ function stopCurrentStream() {
 
 function playStream(rawUrl) {
   const proxiedStreamUrl = `${backendEndpoint}?stream=${encodeURIComponent(rawUrl)}`;
-
   stopCurrentStream();
 
   const playerWrapper = document.getElementById("playerWrapper");
@@ -777,8 +691,7 @@ function playStream(rawUrl) {
       enableWorker: true,
       lowLatencyMode: false,
       liveSyncDurationCount: 3,
-      maxBufferLength: 8,
-      maxMaxBufferLength: 16
+      maxBufferLength: 8
     });
 
     hls.loadSource(proxiedStreamUrl);
@@ -787,18 +700,6 @@ function playStream(rawUrl) {
 
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       video.play().catch(() => {});
-    });
-
-    hls.on(Hls.Events.ERROR, function (event, data) {
-      if (data.fatal) {
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-          hls.startLoad();
-        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-          hls.recoverMediaError();
-        } else {
-          hls.destroy();
-        }
-      }
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = proxiedStreamUrl;
@@ -810,3 +711,4 @@ function playStream(rawUrl) {
 </script>
 </body>
 </html>
+
