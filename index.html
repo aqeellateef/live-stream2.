@@ -62,6 +62,38 @@ html, body {
   pointer-events: none;
 }
 
+/* إظهار زر العودة للقنوات فقط في وضع ملء الشاشة */
+.back-to-channels-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(20, 26, 41, 0.85);
+  border: 2px solid var(--tv-accent);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 999;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 15px var(--tv-accent-glow);
+  transition: all 0.2s;
+}
+
+.tv-layout.fullscreen-mode .back-to-channels-btn {
+  display: flex;
+}
+
+.back-to-channels-btn:focus {
+  background: var(--tv-accent);
+  transform: scale(1.05);
+  outline: none;
+}
+
 .player-section {
   background: #000;
   display: flex;
@@ -308,6 +340,12 @@ html, body {
 
 <div class="tv-layout" id="tvLayout">
   <div class="player-section" id="playerSection">
+    <!-- زر إظهار القنوات يظهر فقط عند تكبير الشاشة -->
+    <button class="back-to-channels-btn" id="backBtn" tabindex="0" onclick="showChannelsList()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      قائمة القنوات
+    </button>
+
     <div class="player-wrapper" id="playerWrapper">
       <iframe id="streamFrame" class="stream-iframe" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
     </div>
@@ -366,18 +404,28 @@ const encodedAlwanChannels = [
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
   
-  // زر الرجوع (Back / Esc) لإظهار القوائم والقنوات بضغطة واحدة
-  document.addEventListener('keydown', (e) => {
+  // معالجة شاملة لأزرار الرجوع في مختلف أجهزة التلفاز والمتصفحات
+  window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' || e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 461 || e.keyCode === 10009) {
       const layout = document.getElementById('tvLayout');
       if (layout.classList.contains('fullscreen-mode')) {
-        layout.classList.remove('fullscreen-mode');
+        showChannelsList();
         e.preventDefault();
         e.stopPropagation();
       }
     }
-  });
+  }, true);
 });
+
+function showChannelsList() {
+  const layout = document.getElementById('tvLayout');
+  layout.classList.remove('fullscreen-mode');
+  // إعادة التركيز على أول قناة لتسهيل التصفح بالريموت
+  setTimeout(() => {
+    const firstCard = document.querySelector('.tv-channel-card');
+    if (firstCard) firstCard.focus();
+  }, 100);
+}
 
 async function fetchFromBackend(path) {
   const res = await fetch(`${backendEndpoint}${path}`);
@@ -496,13 +544,14 @@ function renderFallbackChannels() {
       <span class="tv-channel-action">تشغيل</span>
     `;
 
-    // الضغط مرة واحدة لتشغيل القناة وفتح الشاشة الكاملة فوراً
     item.onclick = () => {
       document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
       item.classList.add("active-channel");
       document.getElementById("activeChannelName").textContent = channel.name;
       playStream(channel.url);
       document.getElementById('tvLayout').classList.add('fullscreen-mode');
+      // تركيز تلقائي على زر العودة لتسهيل الاستجابة للريموت
+      setTimeout(() => document.getElementById('backBtn').focus(), 100);
     };
 
     channelsList.appendChild(item);
@@ -556,13 +605,13 @@ function renderAlwanSportChannels() {
       <span class="tv-channel-action">تشغيل</span>
     `;
 
-    // الضغط مرة واحدة لتشغيل القناة وفتح الشاشة الكاملة فوراً
     item.onclick = () => {
       document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
       item.classList.add("active-channel");
       document.getElementById("activeChannelName").textContent = channel.name;
       document.getElementById('streamFrame').src = atob(channel.code);
       document.getElementById('tvLayout').classList.add('fullscreen-mode');
+      setTimeout(() => document.getElementById('backBtn').focus(), 100);
     };
 
     channelsList.appendChild(item);
@@ -627,13 +676,13 @@ async function loadChannelsForCategory(catId, catName, autoPlayFirst = false) {
         <span class="tv-channel-action">تشغيل</span>
       `;
 
-      // الضغط مرة واحدة لتشغيل القناة وفتح الشاشة الكاملة فوراً
       item.onclick = async () => {
         document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
         item.classList.add("active-channel");
         document.getElementById("activeChannelName").textContent = chName;
         await playChannelStream(chId, channel);
         document.getElementById('tvLayout').classList.add('fullscreen-mode');
+        setTimeout(() => document.getElementById('backBtn').focus(), 100);
       };
 
       channelsList.appendChild(item);
