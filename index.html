@@ -1,61 +1,654 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل الفيديو</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Live Sports Tv</title> 
 
-        .video-container {
-            width: 100%;
-            max-width: 800px;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"> 
 
-        iframe {
-            width: 100%;
-            height: 450px;
-            border: none;
-        }
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
 
-        .telegram-bar {
-            width: 100%;
-            max-width: 800px;
-            background-color: #0088cc;
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 18px;
-            transition: background-color 0.3s;
-        }
+<style>
+:root {
+  --yacine-dark: #121620;
+  --yacine-card: #1b2131;
+  --yacine-orange: #ff6b00;
+  --yacine-red: #e50914;
+  --yacine-border: rgba(255, 255, 255, 0.07);
+}
 
-        .telegram-bar:hover {
-            background-color: #006699;
-        }
-    </style>
-</head>
-<body>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 
-    <div class="video-container">
-        <iframe src="https://hello.teri-kora.com/splayer/Live1.php" allowfullscreen></iframe>
-        
-        <a href="https://t.me/c1_x2" class="telegram-bar" target="_blank">
-            اشترك في قناتنا على تليجرام ليصلك كل جديد
-        </a>
+body {
+  font-family: 'Cairo', sans-serif;
+  background-color: var(--yacine-dark);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Video Player Fixed at Top */
+.player-wrapper {
+  width: 100%;
+  background: #000;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+#artplayer-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+/* Categories Horizontal Bar below video */
+.categories-bar {
+  background: #181d2b;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  gap: 8px;
+  border-bottom: 2px solid var(--yacine-orange);
+  scrollbar-width: none;
+}
+
+.categories-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill {
+  background: #252e46;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.category-pill:hover, .category-pill.active {
+  background: var(--yacine-orange);
+  color: white;
+  border-color: var(--yacine-orange);
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+}
+
+/* Main Content & Channels List */
+.content-body {
+  padding: 12px;
+  flex: 1;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 14px;
+  background: var(--yacine-orange);
+  border-radius: 2px;
+}
+
+.channels-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.channel-item {
+  background-color: var(--yacine-card);
+  border: 1px solid var(--yacine-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.channel-item:hover, .channel-item.active-channel {
+  border-color: var(--yacine-orange);
+  background: #20273a;
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--yacine-red);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--yacine-red);
+  animation: flash 1.5s infinite;
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.channel-name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.watch-btn {
+  background: rgba(255, 107, 0, 0.15);
+  color: var(--yacine-orange);
+  border: none;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.channel-item.active-channel .watch-btn {
+  background: var(--yacine-orange);
+  color: white;
+}
+
+.status-message {
+  text-align: center;
+  padding: 30px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.mini-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--yacine-orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 8px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Telegram Dialog Modal Styles */
+.tg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.tg-modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tg-modal-card {
+  background: #181c29;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  max-width: 380px;
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.tg-modal-overlay.show .tg-modal-card {
+  transform: scale(1);
+}
+
+.tg-icon-wrapper {
+  width: 65px;
+  height: 65px;
+  margin: 0 auto 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tg-icon-wrapper svg {
+  width: 55px;
+  height: 55px;
+  fill: #229ED9;
+  filter: drop-shadow(0 0 10px rgba(34, 158, 217, 0.4));
+}
+
+.tg-modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #229ED9;
+  margin-bottom: 10px;
+}
+
+.tg-modal-desc {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.tg-checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.tg-checkbox-container input {
+  accent-color: #229ED9;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.tg-btn-join {
+  display: block;
+  width: 100%;
+  background: #229ED9;
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 15px rgba(34, 158, 217, 0.3);
+  transition: background 0.2s;
+}
+
+.tg-btn-join:hover {
+  background: #1b85b8;
+}
+
+.tg-btn-later {
+  display: block;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tg-btn-later:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+</style>
+</head> 
+
+<body oncontextmenu="return false;"> 
+
+<!-- نافذة تيليغرام المنبثقة باللغة العربية بالكامل -->
+<div class="tg-modal-overlay" id="tgModal">
+  <div class="tg-modal-card">
+    <div class="tg-icon-wrapper">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.38-.51 1.08-.78 4.22-1.84 7.03-3.04 8.43-3.61 4.01-1.67 4.84-1.96 5.38-1.97.12 0 .39.03.56.17.15.12.19.28.21.4-.01.06.01.24-.02.38z"/>
+      </svg>
     </div>
+    <div class="tg-modal-title">انضم إلى مجتمعنا</div>
+    <div class="tg-modal-desc">ابق على اطلاع بآخر التحديثات والقنوات الجديدة والميزات الحصرية. انضم إلى قناتنا على تيليغرام للحصول على الأخبار الفورية والدعم المستمر!</div>
+    
+    <label class="tg-checkbox-container">
+      <input type="checkbox" id="dontShowAgain">
+      <span>لا تظهر مرة أخرى</span>
+    </label>
 
+    <a href="https://t.me/c1_x2" target="_blank" class="tg-btn-join" id="joinTgBtn">انضم إلى تيليغرام</a>
+    <button class="tg-btn-later" id="closeTgModal">ربما لاحقاً</button>
+  </div>
+</div>
 
+<!-- مشغل الفيديو في الأعلى -->
+<div class="player-wrapper">
+  <div id="artplayer-container"></div>
+  
+  <!-- شريط الأقسام الأفقي أسفل الفيديو -->
+  <div class="categories-bar" id="categoriesBar">
+    <button class="category-pill active">جاري التحميل...</button>
+  </div>
+</div>
+
+<!-- قائمة القنوات في الأسفل -->
+<div class="content-body">
+  <div class="section-title" id="sectionTitle">قنوات بين الرياضية</div>
+  <div class="channels-grid" id="channelsList">
+    <div class="status-message">
+      <div class="mini-spinner"></div>
+      جاري تحميل الأقسام والقنوات...
+    </div>
+  </div>
+</div>
+
+<script>
+const backendEndpoint = "https://yacine-proxy.hsinnzaer5.workers.dev";
+
+let artInstance = null;
+let currentHls = null;
+let allBeinCategories = [];
+let isInitialLoad = true;
+
+// دالة لتنسيق الكلمات الإنجليزية بحيث يكون الحرف الأول كبير فقط
+function capitalizeFirstLetter(val) {
+  if (!val) return '';
+  const str = String(val).trim();
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const isHidden = localStorage.getItem("hide_telegram_dialog");
+  if (!isHidden) {
+    setTimeout(() => {
+      document.getElementById("tgModal").classList.add("show");
+    }, 500);
+  }
+
+  const closeModal = () => {
+    const dontShow = document.getElementById("dontShowAgain").checked;
+    if (dontShow) {
+      localStorage.setItem("hide_telegram_dialog", "true");
+    }
+    document.getElementById("tgModal").classList.remove("show");
+  };
+
+  document.getElementById("closeTgModal").onclick = closeModal;
+  document.getElementById("joinTgBtn").onclick = () => {
+    closeModal();
+  };
+
+  initApp();
+});
+
+async function fetchFromBackend(path) {
+  const res = await fetch(`${backendEndpoint}${path}`);
+  if (!res.ok) throw new Error(`Status: ${res.status}`);
+  return await res.json();
+}
+
+async function initApp() {
+  const categoriesBar = document.getElementById("categoriesBar");
+  const channelsList = document.getElementById("channelsList");
+
+  try {
+    const res = await fetchFromBackend("/api/categories");
+    const list = Array.isArray(res) ? res : (res.data || []);
+
+    allBeinCategories = list.filter(cat => {
+      const name = (cat.name || cat.title || "").toLowerCase();
+      return name.includes("bein") || name.includes("بي ان") || name.includes("بي إن") || name.includes("بين") || name.includes("sports");
+    });
+
+    if (allBeinCategories.length === 0) {
+      allBeinCategories = list;
+    }
+
+    if (allBeinCategories.length === 0) {
+      categoriesBar.innerHTML = `<span style="font-size:0.75rem; color:#94a3b8;">لا توجد أقسام</span>`;
+      channelsList.innerHTML = `<div class="status-message">⚠️ لم يتم العثور على أقسام متاحة</div>`;
+      return;
+    }
+
+    categoriesBar.innerHTML = "";
+    allBeinCategories.forEach((cat, index) => {
+      const rawName = cat.name || cat.title || `قسم ${index + 1}`;
+      const catName = capitalizeFirstLetter(rawName);
+
+      const btn = document.createElement("button");
+      btn.className = "category-pill";
+      if (index === 0) btn.classList.add("active");
+      btn.textContent = catName;
+
+      btn.onclick = () => {
+        document.querySelectorAll(".category-pill").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        isInitialLoad = false;
+        loadChannelsForCategory(cat.id, catName);
+      };
+
+      categoriesBar.appendChild(btn);
+    });
+
+    isInitialLoad = true;
+    const firstCat = allBeinCategories[0];
+    loadChannelsForCategory(firstCat.id, capitalizeFirstLetter(firstCat.name || firstCat.title));
+
+  } catch (err) {
+    categoriesBar.innerHTML = `<span style="font-size:0.75rem; color:#e50914;">خطأ في التحميل</span>`;
+    channelsList.innerHTML = `<div class="status-message">⚠️ تعذر الاتصال بالخادم</div>`;
+  }
+}
+
+async function loadChannelsForCategory(catId, catName) {
+  const channelsList = document.getElementById("channelsList");
+  const sectionTitle = document.getElementById("sectionTitle");
+
+  sectionTitle.textContent = catName;
+  channelsList.innerHTML = `
+    <div class="status-message">
+      <div class="mini-spinner"></div>
+      جاري تحميل قنوات ${catName}...
+    </div>
+  `;
+
+  try {
+    const endpoints = [
+      `/api/categories/${catId}/channels`,
+      `/api/category/${catId}/channels`,
+      `/api/channels?category_id=${catId}`,
+      `/api/channels/${catId}`
+    ];
+
+    let channels = [];
+    for (const ep of endpoints) {
+      try {
+        const chRes = await fetchFromBackend(ep);
+        const extracted = Array.isArray(chRes) ? chRes : (chRes.data || []);
+        if (Array.isArray(extracted) && extracted.length > 0) {
+          channels = extracted;
+          break;
+        }
+      } catch (e) {}
+    }
+
+    channelsList.innerHTML = "";
+
+    if (channels.length === 0) {
+      channelsList.innerHTML = `<div class="status-message">لا توجد قنوات متاحة في هذا القسم.</div>`;
+      return;
+    }
+
+    channels = channels.slice(0, 6);
+
+    channels.forEach((channel, index) => {
+      const rawChName = channel.name || channel.title;
+      const chName = capitalizeFirstLetter(rawChName);
+      const chId = channel.id;
+
+      const item = document.createElement("div");
+      item.className = "channel-item";
+      if (isInitialLoad && index === 0) {
+        item.classList.add("active-channel");
+      }
+
+      item.innerHTML = `
+        <div class="channel-info">
+          <span class="live-dot"></span>
+          <span class="channel-name">${chName}</span>
+        </div>
+        <button class="watch-btn">تشغيل</button>
+      `;
+
+      item.onclick = async () => {
+        document.querySelectorAll(".channel-item").forEach(i => i.classList.remove("active-channel"));
+        item.classList.add("active-channel");
+
+        await playChannelStream(chId, channel);
+      };
+
+      channelsList.appendChild(item);
+    });
+
+    if (isInitialLoad && channels.length > 0) {
+      await playChannelStream(channels[0].id, channels[0]);
+      isInitialLoad = false;
+    }
+
+  } catch (err) {
+    channelsList.innerHTML = `<div class="status-message">⚠️ فشل تحميل القنوات</div>`;
+  }
+}
+
+async function playChannelStream(channelId, channelObj) {
+  try {
+    const data = await fetchFromBackend(`/api/channel/${channelId}`);
+    let streamUrl = "";
+
+    if (Array.isArray(data) && data.length > 0) {
+      streamUrl = data[0].url || data[0].stream_url;
+    } else if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+      streamUrl = data.data[0].url || data.data[0].stream_url;
+    } else if (data.url || data.stream_url) {
+      streamUrl = data.url || data.stream_url;
+    } else if (channelObj && (channelObj.url || channelObj.stream_url)) {
+      streamUrl = channelObj.url || channelObj.stream_url;
+    }
+
+    if (streamUrl) {
+      playStream(streamUrl);
+    }
+  } catch (e) {
+    if (channelObj && (channelObj.url || channelObj.stream_url)) {
+      playStream(channelObj.url || channelObj.stream_url);
+    }
+  }
+}
+
+function playStream(rawUrl) {
+  const proxiedStreamUrl = `${backendEndpoint}?stream=${encodeURIComponent(rawUrl)}`;
+
+  if (currentHls) {
+    currentHls.stopLoad();
+    currentHls.detachMedia();
+    currentHls.destroy();
+    currentHls = null;
+  }
+
+  if (artInstance) {
+    if (artInstance.video) {
+      artInstance.video.pause();
+      artInstance.video.removeAttribute('src');
+      artInstance.video.load();
+    }
+    artInstance.destroy(true);
+    artInstance = null;
+  }
+
+  artInstance = new Artplayer({
+    container: '#artplayer-container',
+    url: proxiedStreamUrl,
+    type: 'm3u8',
+    isLive: true,
+    autoplay: true,
+    autoMini: true,
+    fullscreen: true,
+    fullscreenWeb: true,
+    playsInline: true,
+    customType: {
+      m3u8: function (video, url) {
+        if (Hls.isSupported()) {
+          const hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: false,
+            liveSyncDurationCount: 3,
+            maxBufferLength: 8,
+            maxMaxBufferLength: 16
+          });
+
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          currentHls = hls;
+
+          hls.on(Hls.Events.ERROR, function (event, data) {
+            if (data.fatal) {
+              if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                hls.startLoad();
+              } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                hls.recoverMediaError();
+              } else {
+                hls.destroy();
+              }
+            }
+          });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = url;
+        }
+      },
+    },
+  });
+}
+</script>
 </body>
 </html>
