@@ -31,7 +31,6 @@
   user-select: none;
 }
 
-/* فرض العرض الأفقي الإجباري */
 html, body {
   width: 100vw;
   height: 100vh;
@@ -44,24 +43,23 @@ html, body {
   left: 0;
 }
 
-@media screen and (orientation: portrait) {
-  body {
-    transform: rotate(90deg);
-    transform-origin: left top;
-    width: 100vh;
-    height: 100vw;
-    position: absolute;
-    top: 0;
-    left: 100%;
-    overflow: hidden;
-  }
-}
-
 .tv-layout {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   height: 100vh;
   width: 100vw;
+  transition: all 0.3s ease;
+}
+
+/* وضع ملء الشاشة لإخفاء القوائم وتوسيع الفيديو بالكامل */
+.tv-layout.fullscreen-mode {
+  grid-template-columns: 1fr 0fr !important;
+}
+
+.tv-layout.fullscreen-mode .sidebar-section {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .player-section {
@@ -70,6 +68,8 @@ html, body {
   flex-direction: column;
   position: relative;
   border-left: 2px solid var(--tv-border);
+  width: 100%;
+  height: 100%;
 }
 
 .player-wrapper {
@@ -83,9 +83,9 @@ html, body {
 }
 
 #native-video, .stream-iframe {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important;
   background: #000;
   border: none;
 }
@@ -130,6 +130,7 @@ html, body {
   background: var(--tv-surface);
   padding: 20px;
   overflow: hidden;
+  transition: opacity 0.3s ease;
 }
 
 .tv-categories {
@@ -177,7 +178,6 @@ html, body {
   outline: none;
 }
 
-/* شريط الجودات الثابت أسفل الأقسام */
 .tv-qualities-bar {
   display: flex;
   gap: 8px;
@@ -306,9 +306,8 @@ html, body {
 
 <body oncontextmenu="return false;"> 
 
-<div class="tv-layout">
-  <!-- قسم مشغل الفيديو (اليمين) -->
-  <div class="player-section">
+<div class="tv-layout" id="tvLayout">
+  <div class="player-section" id="playerSection">
     <div class="player-wrapper" id="playerWrapper">
       <iframe id="streamFrame" class="stream-iframe" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
     </div>
@@ -321,21 +320,17 @@ html, body {
     </div>
   </div>
 
-  <!-- قسم الأقسام والقنوات (اليسار) -->
   <div class="sidebar-section">
-    <!-- شريط الأقسام -->
     <div class="tv-categories" id="categoriesBar">
       <button class="tv-cat-btn active">جاري التحميل...</button>
     </div>
 
-    <!-- أزرار تغيير الجودة الثابتة تحت قسم Bein Sports -->
     <div class="tv-qualities-bar" id="qualitiesBar">
       <button class="tv-quality-btn" id="badgeSD" tabindex="0" onclick="switchToQualityCategory('360', 'SD')">SD</button>
       <button class="tv-quality-btn" id="badgeHD" tabindex="0" onclick="switchToQualityCategory('720', 'HD')">HD</button>
       <button class="tv-quality-btn active" id="badgeFHD" tabindex="0" onclick="switchToQualityCategory('1080', 'FHD')">FHD</button>
     </div>
 
-    <!-- قائمة القنوات -->
     <div class="tv-channels-container" id="channelsList">
       <div class="tv-status">
         <div class="tv-spinner"></div>
@@ -370,7 +365,29 @@ const encodedAlwanChannels = [
 
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
+  
+  // زر العودة أو الضغط على زر Back في التلفاز لإعادة إظهار القوائم إذا كانت مخفية
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 461) {
+      const layout = document.getElementById('tvLayout');
+      if (layout.classList.contains('fullscreen-mode')) {
+        layout.classList.remove('fullscreen-mode');
+        e.preventDefault();
+      }
+    }
+  });
 });
+
+function toggleFullscreenMode() {
+  const layout = document.getElementById('tvLayout');
+  layout.classList.toggle('fullscreen-mode');
+  
+  // تفعيل نظام ملء الشاشة في المتصفح أيضاً
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen().catch(() => {});
+  }
+}
 
 async function fetchFromBackend(path) {
   const res = await fetch(`${backendEndpoint}${path}`);
@@ -380,7 +397,6 @@ async function fetchFromBackend(path) {
 
 async function initApp() {
   const categoriesBar = document.getElementById("categoriesBar");
-  const channelsList = document.getElementById("channelsList");
   const tvIconSvg = `<svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>`;
 
   try {
@@ -490,11 +506,22 @@ function renderFallbackChannels() {
       <span class="tv-channel-action">تشغيل</span>
     `;
 
+    // دعم الضغط مرة واحدة (تشغيل عادي) والضغط المزدوج (ملء الشاشة وإخفاء القوائم)
+    let clickTimer = null;
     item.onclick = () => {
-      document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
-      item.classList.add("active-channel");
-      document.getElementById("activeChannelName").textContent = channel.name;
-      playStream(channel.url);
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        toggleFullscreenMode(); // الضغط المزدوج
+      } else {
+        clickTimer = setTimeout(() => {
+          clickTimer = null;
+          document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
+          item.classList.add("active-channel");
+          document.getElementById("activeChannelName").textContent = channel.name;
+          playStream(channel.url);
+        }, 250);
+      }
     };
 
     channelsList.appendChild(item);
@@ -548,11 +575,21 @@ function renderAlwanSportChannels() {
       <span class="tv-channel-action">تشغيل</span>
     `;
 
+    let clickTimer = null;
     item.onclick = () => {
-      document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
-      item.classList.add("active-channel");
-      document.getElementById("activeChannelName").textContent = channel.name;
-      document.getElementById('streamFrame').src = atob(channel.code);
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        toggleFullscreenMode();
+      } else {
+        clickTimer = setTimeout(() => {
+          clickTimer = null;
+          document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
+          item.classList.add("active-channel");
+          document.getElementById("activeChannelName").textContent = channel.name;
+          document.getElementById('streamFrame').src = atob(channel.code);
+        }, 250);
+      }
     };
 
     channelsList.appendChild(item);
@@ -617,11 +654,21 @@ async function loadChannelsForCategory(catId, catName, autoPlayFirst = false) {
         <span class="tv-channel-action">تشغيل</span>
       `;
 
+      let clickTimer = null;
       item.onclick = async () => {
-        document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
-        item.classList.add("active-channel");
-        document.getElementById("activeChannelName").textContent = chName;
-        await playChannelStream(chId, channel);
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+          clickTimer = null;
+          toggleFullscreenMode();
+        } else {
+          clickTimer = setTimeout(async () => {
+            clickTimer = null;
+            document.querySelectorAll(".tv-channel-card").forEach(i => i.classList.remove("active-channel"));
+            item.classList.add("active-channel");
+            document.getElementById("activeChannelName").textContent = chName;
+            await playChannelStream(chId, channel);
+          }, 250);
+        }
       };
 
       channelsList.appendChild(item);
@@ -711,4 +758,3 @@ function playStream(rawUrl) {
 </script>
 </body>
 </html>
-
