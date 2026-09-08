@@ -22,14 +22,15 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- الإطار الآمن للموقع -->
+    <!-- تم إضافة صلاحيات التدوير وملء الشاشة وخصائص الأمان للإطار -->
     <iframe id="secureFrame" src="" allow="fullscreen; autoplay; encrypted-media" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
 
     <script>
-        // تشفير الرابط الجديد بطريقة Base64 (https://s778899.ai.studio)
-        const encodedUrl = "aHR0cHM6Ly9zNzc4ODk5LmFpLnN0ZGlv";
+        // تشفير الرابط الأساسي بطريقة Base64 لمنع قراءته مباشرة
+        // الرابط الأصلي: https://s778899.ai.studio
+        const encodedUrl = "aHR0cHM6Ly9zNzc4ODk5LmFpLnN0dWRpbw==";
         
-        // فك تشفير الرابط وتطبيقه برمجياً مباشرة عند فتح الصفحة
+        // فك تشفير الرابط وتطبيقه برمجياً
         document.getElementById('secureFrame').src = atob(encodedUrl);
 
         // منع استخدام زر الفأرة الأيمن
